@@ -13,7 +13,7 @@ bool agentValide = false; //Est-ce que la lettre d'agent est valide ?
 //Bool authentification
 bool authentifie = false;
 
-//Bool disable, activé si authentification ratées
+//Bool disable, activé si authentification ratée
 bool disable = false;
 
 const bool secLevel[5][5] = {{true,  false, true,  false, false}, //Sec Level 1
