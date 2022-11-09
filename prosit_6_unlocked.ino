@@ -1,10 +1,14 @@
-//Liste des lettres d'agent
-char Agents[16] = {'A', 'B', 'C', 'D', 'E', 'F', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q'};
+//####################################
+//###### Def Variables Globales ######
+//####################################
+
+//Liste des lettres d'agent (Constante)
+const char Agents[16] = {'A', 'B', 'C', 'D', 'E', 'F', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q'};
 
 //Agent variables
-char lettreAgent; //Lettre d'identification envoyé par l'agent
+char lettreAgent; //Lettre d'identification envoyée par l'agent
 int numAgent; //Numéro de l'agent, dérivé de la lettre
-bool agentValide = false; //Es-ce que la lettre d'agent est valide?
+bool agentValide = false; //Est-ce que la lettre d'agent est valide ?
 
 //Bool authentification
 bool authentifie = false;
@@ -12,68 +16,62 @@ bool authentifie = false;
 //Bool disable, activé si authentification ratées
 bool disable = false;
 
-bool secLevel[5][5] = {{true, false, true, false, false}, //Sec Level 1
-                       {true, false, false, true, false}, //Sec Level 2
-                       {false, true, false, false, true}, //Sec Level 3
-                       {false, true, true, true, false}, //Sec Level 4
-                       {true, true, true, false, true}}; //Sec Level 5
-
+const bool secLevel[5][5] = {{true,  false, true,  false, false}, //Sec Level 1
+                             {true,  false, false, true,  false}, //Sec Level 2
+                             {false, true,  false, false, true},  //Sec Level 3
+                             {false, true,  true,  true,  false}, //Sec Level 4
+                             {true,  true,  true,  false, true}}; //Sec Level 5
 
 int secValue = 3; //Valeur de sécurité de l'agent
 
 String launchOf = "Lancement de "; //String lancement de
-String authFailed = "Authentification ratee, vous aveu echoue "; //String authentification ratée
+String authFailed = "Authentification ratée, vous avez échoué "; //String authentification ratée
 
-
-//############################################
-//####### MA1 Methode d'identification #######
-//############################################
-
+//###############
+//##### MA1 #####
+//###############
 
 bool MA1(int numAgent) {
-    String Q[3][4] = {{"Si 1+1=3, 1+2=?", "1", "4", "69"},
-                      {"Quel est notre methode d'assasination preferee?", "Tireur d'elite", "Paves explosifs", "Missile Balistique Intercontinental"},
-                      {"Quel est notre slogan?", "Tuer d'abord, poser les question apres", "On espionne tout le monde, c'est plus egalitaire", "On en a pas, on est un service secret"}};
+    bool Valid = false;
+    int juste = 0;
 
+    // Def Questions & Réponses
+    const String Q[3][4] = {{"Si 1+1=3, 1+2=?",                                "1",                                      "4",                                                "69"},
+                            {"Quel est notre methode d'assassinat préférée ?", "Tireur d'élite",                         "Paves explosifs",                                  "Missile Balistique Intercontinental"},
+                            {"Quel est notre slogan?",                         "Tuer d'abord, poser les question apres", "On espionne tout le monde, c'est plus égalitaire", "On en a pas, on est un service secret"}};
     int a[3] = {2, 3, 3};
 
-    Serial.println("Repondez aux questions afin de reussir l'authentification");
+    Serial.println("Répondez aux questions afin de réussir l'authentification");
 
-
-    for (int i = 0; i < 3; i++) {
+    for (int i = 0; i < 3; i++) {  // Affiche la question
         Serial.println(Q[i][0]);
-
-        for (int j = 1; j < 4; j++) {
+        for (int j = 1; j < 4; j++) {  // Affiche les réponses
             Serial.print(j);
             Serial.print(" : ");
             Serial.println(Q[i][j]);
         }
 
-        Serial.println("Votre reponse: ");
-
-        while (Serial.available() == 0){
-
+        Serial.println("Votre réponse: ");
+        while (Serial.available() == 0) {
+            // attente que la console série soit utilisée
         }
-        if (Serial.available() > 0) {
-            int reponse = Serial.parseInt();
-            if (reponse == a[i]) {
-                Serial.println("Reponse correcte");
-                for (int j = 0; j < 10; ++j) {
-                    Serial.println("");
-                }
-            }
-            else {
-                Serial.println("Reponse incorrecte");
-                return false;
-            }
+
+        if (Serial.parseInt() == a[i]) {
+            ++juste;
+        }
+        for (int j = 0; j < 10; ++j) {
+            Serial.println("");
         }
     }
-    return true;
+    if (juste == 3) {
+        Valid = true;
+    }
+    return Valid;
 }
 
-//############################################
-//####### MA2 Methode d'identification #######
-//############################################
+//###############
+//##### MA2 #####
+//###############
 
 //Declare module function
 int Modexp(int a, int e, int n) {
@@ -81,14 +79,12 @@ int Modexp(int a, int e, int n) {
     if (e < 0) {
         Serial.println("Unhandled Case");
         return -1;
-    }
-    else {
-        if (a == 0 or n == 1){
+    } else {
+        if (a == 0 or n == 1) {
             r = 0;
-        }
-        else {
+        } else {
             r = 1;
-            while (e > 0){
+            while (e > 0) {
                 r = (r * (a % n)) % n;
                 --e;
             }
@@ -98,8 +94,8 @@ int Modexp(int a, int e, int n) {
 }
 
 //Declare encryption function
-int chiffrer (int M, int e) {
-    int n = 43*67;
+int chiffrer(int M, int e) {
+    int n = 43 * 67;
     return Modexp(M, e, n);
 }
 
@@ -123,25 +119,24 @@ bool MA2(int numAgent) {
     cleAgent = publicKeys[numAgent];
     C = chiffrer(M, cleAgent);
 
-    Serial.print("(Message decrypte: ");
+    Serial.print("(Message décrypté : ");
     Serial.print(M);
     Serial.println(")");
 
-    Serial.println("Veuillez decrypter le code suivant avec votre cle privee: ");
+    Serial.println("Veuillez decrypter le code suivant avec votre cle privée : ");
     Serial.println(C);
 
     while (essais > 0) {
         if (Serial.available() > 0) {
             Mp = Serial.parseInt(SKIP_ALL);
             if (M == Mp) {
-                Serial.println("Authentification reussie!");
+                Serial.println("Authentification réussie !");
                 return true;
-            }
-            else {
-                Serial.println("\nValeur incorrecte!\n");
+            } else {
+                Serial.println("\nValeur incorrecte !\n");
                 essais--;
                 if (essais == 0) {
-                    Serial.println("Vous avez epuise vos essais!\n");
+                    Serial.println("Vous avez épuisé vos essais!\n");
                     return false;
                 }
                 Serial.print("Il vous reste ");
@@ -153,29 +148,29 @@ bool MA2(int numAgent) {
     return false;
 }
 
-//############################################
-//####### MA3 Methode d'identification #######
-//############################################
+//###############
+//##### MA3 #####
+//###############
 
 bool MA3(int numAgent) {
-    Serial.println("Scan retinien en cours...\n");
-    Serial.println("Scan retinien reussi!\n");
+    Serial.println("Scan rétinien en cours...\n");
+    Serial.println("Scan rétinien réussi !\n");
     return true;
 }
 
-//############################################
-//####### MA4 Methode d'identification #######
-//############################################
+//###############
+//##### MA4 #####
+//###############
 
 bool MA4(int numAgent) {
     Serial.println("Scan digital en cours...\n");
-    Serial.println("Scan digital reussi!\n");
+    Serial.println("Scan digital réussi !\n");
     return true;
 }
 
-//############################################
-//####### MA5 Methode d'identification #######
-//############################################
+//###############
+//##### MA5 #####
+//###############
 
 bool MA5(int numAgent) {
     int pw[16] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16};
@@ -186,12 +181,10 @@ bool MA5(int numAgent) {
 
     while (Serial.available() == 0) {
         if (Serial.available() > 0) {
-            int reponse = Serial.parseInt(SKIP_ALL);
-            if (reponse == pw[numAgent]) {
+            if (Serial.parseInt(SKIP_ALL) == pw[numAgent]) {
                 Serial.println("Mot de passe juste!");
                 return true;
-            }
-            else {
+            } else {
                 Serial.println("Mot de passe incorrect!");
                 return false;
             }
@@ -223,13 +216,11 @@ void loop() {
                     Serial.println("Lettre d'agent invalide!");
                 }
             }
-        }
-
-        else {
-            if (secLevel[secValue][1] == true){
+        } else {
+            if (secLevel[secValue][1] == true) {
                 Serial.print(launchOf);
                 Serial.println("MA1 \n");
-                if (MA1(numAgent) == false){
+                if (MA1(numAgent) == false) {
 
                     Serial.print(authFailed);
                     Serial.println("MA1!");
@@ -238,10 +229,10 @@ void loop() {
                     return;
                 }
             }
-            if (secLevel[secValue][2] == true){
+            if (secLevel[secValue][2] == true) {
                 Serial.print(launchOf);
                 Serial.println("MA2 \n");
-                if (MA2(numAgent) == false){
+                if (MA2(numAgent) == false) {
 
                     Serial.print(authFailed);
                     Serial.println("MA2!");
@@ -250,10 +241,10 @@ void loop() {
                     return;
                 }
             }
-            if (secLevel[secValue][3] == true){
+            if (secLevel[secValue][3] == true) {
                 Serial.print(launchOf);
                 Serial.println("MA3 \n");
-                if (MA3(numAgent) == false){
+                if (MA3(numAgent) == false) {
 
                     Serial.print(authFailed);
                     Serial.println("MA3!");
@@ -262,10 +253,10 @@ void loop() {
                     return;
                 }
             }
-            if (secLevel[secValue][4] == true){
+            if (secLevel[secValue][4] == true) {
                 Serial.print(launchOf);
                 Serial.println("MA4 \n");
-                if (MA4(numAgent) == false){
+                if (MA4(numAgent) == false) {
 
                     Serial.print(authFailed);
                     Serial.println("MA4!");
@@ -274,10 +265,10 @@ void loop() {
                     return;
                 }
             }
-            if (secLevel[secValue][5] == true){
+            if (secLevel[secValue][5] == true) {
                 Serial.print(launchOf);
                 Serial.println("MA5 \n");
-                if (MA5(numAgent) == false){
+                if (MA5(numAgent) == false) {
 
                     Serial.print(authFailed);
                     Serial.println("MA5!");
@@ -287,7 +278,7 @@ void loop() {
                 }
             }
             authentifie = true;
-            Serial.println("Vous etes authentifie !");
+            Serial.println("Vous êtes authentifie !");
         }
     }
 }
