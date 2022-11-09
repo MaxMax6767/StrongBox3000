@@ -287,7 +287,7 @@ void loop() {
                 }
             }
             authentifie = true;
-            Serial.println("Vous etes authentifie!");
+            Serial.println("Vous etes authentifie !");
         }
     }
 }
