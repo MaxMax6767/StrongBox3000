@@ -13,7 +13,7 @@ bool agentValide = false; //Est-ce que la lettre d'agent est valide ?
 //Bool authentification
 bool authentifie = false;
 
-//Bool disable, activé si authentification ratées
+//Bool disable, activé si authentification ratée
 bool disable = false;
 
 const bool secLevel[5][5] = {{true,  false, true,  false, false}, //Sec Level 1
@@ -25,7 +25,9 @@ const bool secLevel[5][5] = {{true,  false, true,  false, false}, //Sec Level 1
 int secValue = 3; //Valeur de sécurité de l'agent
 
 String launchOf = "Lancement de "; //String lancement de
-String authFailed = "Authentification ratée, vous avez échoué "; //String authentification ratée
+String makeEntry = "Veuillez faire une entree afin de confirmer : "; //String faire une entree
+String authFailed = "Authentification ratee, vous avez echoue "; //String authentification ratée
+String authSuccess = "MA reussi! \n"; //String authentification réussie
 
 //###############
 //##### MA1 #####
@@ -37,11 +39,11 @@ bool MA1(int numAgent) {
 
     // Def Questions & Réponses
     const String Q[3][4] = {{"Si 1+1=3, 1+2=?",                                "1",                                      "4",                                                "69"},
-                            {"Quel est notre methode d'assassinat préférée ?", "Tireur d'élite",                         "Paves explosifs",                                  "Missile Balistique Intercontinental"},
-                            {"Quel est notre slogan?",                         "Tuer d'abord, poser les question apres", "On espionne tout le monde, c'est plus égalitaire", "On en a pas, on est un service secret"}};
+                            {"Quel est notre methode d'assassinat preferee ?", "Tireur d'elite",                         "Paves explosifs",                                  "Missile Balistique Intercontinental"},
+                            {"Quel est notre slogan?",                         "Tuer d'abord, poser les question apres", "On espionne tout le monde, c'est plus egalitaire", "On en a pas, on est un service secret"}};
     int a[3] = {2, 3, 3};
 
-    Serial.println("Répondez aux questions afin de réussir l'authentification");
+    Serial.println("Repondez aux questions afin de reussir l'authentification");
 
     for (int i = 0; i < 3; i++) {  // Affiche la question
         Serial.println(Q[i][0]);
@@ -51,7 +53,7 @@ bool MA1(int numAgent) {
             Serial.println(Q[i][j]);
         }
 
-        Serial.println("Votre réponse: ");
+        Serial.println("Votre reponse: ");
         while (Serial.available() == 0) {
             // attente que la console série soit utilisée
         }
@@ -65,6 +67,7 @@ bool MA1(int numAgent) {
     }
     if (juste == 3) {
         Valid = true;
+        Serial.println(authSuccess);
     }
     return Valid;
 }
@@ -77,7 +80,7 @@ bool MA1(int numAgent) {
 int Modexp(int a, int e, int n) {
     long r;
     if (e < 0) {
-        Serial.println("Unhandled Case");
+        Serial.println("Erreur");
         return -1;
     } else {
         if (a == 0 or n == 1) {
@@ -119,24 +122,24 @@ bool MA2(int numAgent) {
     cleAgent = publicKeys[numAgent];
     C = chiffrer(M, cleAgent);
 
-    Serial.print("(Message décrypté : ");
+    Serial.print("(Message decrypte : ");
     Serial.print(M);
     Serial.println(")");
 
-    Serial.println("Veuillez decrypter le code suivant avec votre cle privée : ");
+    Serial.println("Veuillez decrypter le code suivant avec votre cle privee : ");
     Serial.println(C);
 
     while (essais > 0) {
         if (Serial.available() > 0) {
             Mp = Serial.parseInt(SKIP_ALL);
             if (M == Mp) {
-                Serial.println("Authentification réussie !");
+                Serial.println(authSuccess);
                 return true;
             } else {
                 Serial.println("\nValeur incorrecte !\n");
                 essais--;
                 if (essais == 0) {
-                    Serial.println("Vous avez épuisé vos essais!\n");
+                    Serial.println(authFailed);
                     return false;
                 }
                 Serial.print("Il vous reste ");
@@ -153,8 +156,17 @@ bool MA2(int numAgent) {
 //###############
 
 bool MA3(int numAgent) {
-    Serial.println("Scan rétinien en cours...\n");
-    Serial.println("Scan rétinien réussi !\n");
+    Serial.println("Scan retinien en cours...\n");
+    Serial.println(authSuccess);
+
+    Serial.read();
+
+    Serial.println(makeEntry);
+    while (Serial.available() == 0) {
+        // attente que la console série soit utilisée
+    }
+    Serial.read();
+
     return true;
 }
 
@@ -164,7 +176,16 @@ bool MA3(int numAgent) {
 
 bool MA4(int numAgent) {
     Serial.println("Scan digital en cours...\n");
-    Serial.println("Scan digital réussi !\n");
+    Serial.println(authSuccess);
+
+    Serial.read();
+
+    Serial.println(makeEntry);
+    while (Serial.available() == 0) {
+        // attente que la console série soit utilisée
+    }
+    Serial.read();
+
     return true;
 }
 
@@ -182,10 +203,10 @@ bool MA5(int numAgent) {
     while (Serial.available() == 0) {
         if (Serial.available() > 0) {
             if (Serial.parseInt(SKIP_ALL) == pw[numAgent]) {
-                Serial.println("Mot de passe juste!");
+                Serial.println(authSuccess);
                 return true;
             } else {
-                Serial.println("Mot de passe incorrect!");
+                Serial.println(authFailed);
                 return false;
             }
         }
@@ -278,7 +299,7 @@ void loop() {
                 }
             }
             authentifie = true;
-            Serial.println("Vous êtes authentifie !");
+            Serial.println("Vous etes authentifie !");
         }
     }
 }
