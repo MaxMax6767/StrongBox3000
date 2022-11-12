@@ -47,11 +47,11 @@ bool MA1() {
     int juste = 0;  // Compteur de réponses justes (0 à 3)
 
     // Def Questions & Réponses (Constante)
-    const String Q[3][4] = {{"Si 1+1=3, 1+2=?",                                "1",                                      "4",                                                "69"},
-                            {"Quel est notre methode d'assassinat preferee ?", "Tireur d'elite",                         "Paves explosifs",                                  "Missile Balistique Intercontinental"},
-                            {"Quel est notre slogan?",                         "Tuer d'abord, poser les question apres", "On espionne tout le monde, c'est plus egalitaire", "On en a pas, on est un service secret"}};
+    const String Q[3][4] = {{"Quel est le point cardinal manquant ? Nord / Est / Ouest ", "Nord", "Ouest", "Sud"},
+                            {"De quelle valeur se rapproche le nombre π ?",               "1,11", "2,25",  "3,14"},
+                            {"De quelle couleur est le ciel ?",                           "Bleu", "Vert",  "Jaune"}};
     // Def Réponses Justes (Constante)
-    const int a[3] = {2, 3, 3};
+    const int a[3] = {3, 3, 1};
 
     Serial.println("Repondez aux questions afin de reussir l'authentification");
 
@@ -236,7 +236,7 @@ bool MA5() {
         nomAgent = temp;
     }
 
-    Serial.println("Merci de renseingner votre CardID");  // Demande du numéro de carte
+    Serial.println("Merci de renseigner votre CardID");  // Demande du numéro de carte
     while (Serial.available() == 0) {
         // attente que la console série soit utilisée
     }
