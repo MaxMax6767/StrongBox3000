@@ -257,29 +257,25 @@ bool MA5() {
 
 int authModele() {
     int val = analogRead(A0);  // Lecture de la valeur de l'entrée analogique A0
-    while (!(176 <= val && val <= 198 || 306 <= val && val <= 328 ||
-             388 <= val && val <= 410 || 470 <= val && val <= 492 ||
-             513 <= val && val <= 535 || 550 <= val && val <= 572 ||
-             574 <= val && val <= 596 ||
-             636 <= val && val <= 658)) {  // Tant que la valeur n'est pas comprise entre les bornes, on relit la valeur
+    while (true) {  // Tant que la valeur n'est pas comprise entre les bornes, on relit la valeur
         val = analogRead(A0);
-    }
-    if (176 <= val && val <= 198) {  // Si la valeur est comprise entre les bornes, on renvoie le numéro du modèle
-        return 1;
-    } else if (306 <= val && val <= 328) {
-        return 2;
-    } else if (388 <= val && val <= 410) {
-        return 3;
-    } else if (470 <= val && val <= 492) {
-        return 4;
-    } else if (513 <= val && val <= 535) {
-        return 5;
-    } else if (550 <= val && val <= 572) {
-        return 6;
-    } else if (574 <= val && val <= 596) {
-        return 7;
-    } else if (636 <= val && val <= 658) {
-        return 8;
+        if (176 <= val && val <= 198) {  // Si la valeur est comprise entre les bornes, on renvoie le numéro du modèle
+            return 1;
+        } else if (306 <= val && val <= 328) {
+            return 2;
+        } else if (388 <= val && val <= 410) {
+            return 3;
+        } else if (470 <= val && val <= 492) {
+            return 4;
+        } else if (513 <= val && val <= 535) {
+            return 5;
+        } else if (550 <= val && val <= 572) {
+            return 6;
+        } else if (574 <= val && val <= 596) {
+            return 7;
+        } else if (636 <= val && val <= 658) {
+            return 8;
+        }
     }
 }
 
