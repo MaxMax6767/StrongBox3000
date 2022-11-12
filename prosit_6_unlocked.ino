@@ -2,6 +2,10 @@
 //###### Def Variables Globales ######
 //####################################
 
+// Etat du coffre
+bool open = false;
+bool failed = false;
+
 //Liste des lettres d'agent (Constante)
 static char Nom[16] = {'A', 'B', 'C', 'D', 'E', 'F', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q'};
 
@@ -9,9 +13,31 @@ static char Nom[16] = {'A', 'B', 'C', 'D', 'E', 'F', 'H', 'I', 'J', 'K', 'L', 'M
 char nomAgent;
 
 // Variables de phrases utilisées dans plusieurs fonctions
-String authFailed = "Authentification non reussie"; //Phrase authentification ratée
-String authSuccess = "Authentification reussie ! \n"; //Phrase authentification réussie
-String authPrompt = "Veuillez entrer votre nom d'agent : "; //Phrase de demande d'authentification
+String authPrompt = "Veuillez entrer votre nom d'agent : "; // Phrase de demande d'authentification
+
+//###############
+//##### LED #####
+//###############
+
+void authFailed() {
+    Serial.println("Authentification non reussie\n");  // Phrase authentification ratée
+    for (int i = 0; i < 3; i++) {
+        digitalWrite(11, HIGH);
+        delay(500);
+        digitalWrite(11, LOW);
+        delay(500);
+    }
+}
+
+void authSuccess() {
+    Serial.println("Authentification reussie\n");  // Phrase authentification réussie
+    for (int i = 0; i < 3; i++) {
+        digitalWrite(12, HIGH);
+        delay(500);
+        digitalWrite(12, LOW);
+        delay(500);
+    }
+}
 
 //###############
 //##### MA1 #####
@@ -51,11 +77,11 @@ bool MA1() {
     }
 
     if (juste == 3) {  // Si toutes les réponses sont justes, on renvoie true
-        Serial.println(authSuccess);
+        authSuccess();
         return true;
     }
     // Sinon, on renvoie false
-    Serial.println(authFailed);
+    authFailed();
     return false;
 }
 
@@ -70,11 +96,11 @@ int Modexp(int a, int e, int n) {
         Serial.println("Unhandled Case");
         return -1;
     } else {
-        if (a == 0 or n == 1){
+        if (a == 0 or n == 1) {
             r = 0;
         } else {
             r = 1;
-            while (e > 0){
+            while (e > 0) {
                 r = (r * (a % n)) % n;
                 --e;
             }
@@ -92,8 +118,8 @@ int chiffrer(int M, int e) {
 int cleAgent(char x) {
     // Def Cle publique Agent (Constante)
     static int publicKeys[16] = {601, 619, 631, 641, 647, 653, 661, 673, 691, 701, 733, 739, 751, 797, 809, 811};
-    int i = 0;
-    for (i = 0; i < 16; i++) {
+
+    for (int i = 0; i < 16; i++) {
         if (Nom[i] == x) {
             return publicKeys[i];
         }
@@ -113,6 +139,7 @@ bool MA2() {
     char temp = Serial.read();  // Lit le nom de l'agent
     if (nomAgent != NULL) {  // Si le nom de l'agent est déjà connu, on vérifie qu'il est le même
         if (nomAgent != temp) {  // Si le nom de l'agent est différent, on renvoie false
+            authFailed();
             return false;
         }
     } else {  // Si le nom de l'agent n'est pas connu, on le stocke
@@ -120,6 +147,7 @@ bool MA2() {
     }
 
     if (cleAgent(nomAgent) == -1) {  // Si le nom de l'agent n'est pas reconnu, on renvoie false
+        authFailed();
         return false;
     }
 
@@ -131,13 +159,13 @@ bool MA2() {
         if (Serial.available() > 0) {
             int Mp = Serial.parseInt();
             if (M == Mp) {  // Si la clé originale correspond à celle calculée avec la clé privée, on renvoie true
-                Serial.println(authSuccess);
+                authSuccess();
                 return true;
             } else {  // Sinon, on décrémente le nombre d'essais restants et on affiche un message d'erreur & le nombre d'essais restants
                 Serial.println("\nValeur incorrecte !\n");
                 essais--;
                 if (essais == 0) {
-                    Serial.println(authFailed);
+                    authFailed();
                     return false;
                 }
                 Serial.print("Il vous reste ");
@@ -146,7 +174,7 @@ bool MA2() {
             }
         }
     }
-    Serial.println(authFailed);
+    authFailed();
     return false;
 }
 
@@ -160,11 +188,11 @@ bool MA3() {
         // attente que la console série soit utilisée
     }
     if (Serial.read() == 75) {  // Si K est entré, on renvoie true
-        Serial.println(authSuccess);
+        authSuccess();
         return true;
     }
     // Sinon, on renvoie false
-    Serial.println(authFailed);
+    authFailed();
     return false;
 }
 
@@ -178,11 +206,11 @@ bool MA4() {
         // attente que la console série soit utilisée
     }
     if (Serial.read() == 75) {  // Si K est entré, on renvoie true
-        Serial.println(authSuccess);
+        authSuccess();
         return true;
     }
     // Sinon, on renvoie false
-    Serial.println(authFailed);
+    authFailed();
     return false;
 }
 
@@ -201,7 +229,7 @@ bool MA5() {
     char temp = Serial.read();  // Lit l'identification et le stocke temporairement
     if (nomAgent != NULL) {  // Si le nom de l'agent est déjà connu, on vérifie qu'il est le même
         if (nomAgent != temp) {  // Si le nom de l'agent est différent, on renvoie false
-            Serial.println(authFailed);
+            authFailed();
             return false;
         }
     } else {  // Si le nom de l'agent n'est pas connu, on le stocke
@@ -213,17 +241,17 @@ bool MA5() {
         // attente que la console série soit utilisée
     }
     int cId = Serial.parseInt();  // Lit le numéro de carte et le stocke temporairement
-    int i = 0;  // Initialisation de l'index
+
     for (int i = 0; i < 16; i++) {
         if (Nom[i] == nomAgent) {  // Si le nom de l'agent est reconnu, on vérifie que le numéro de carte correspond
             if (cardId[i] == cId) {  // Si le numéro de carte correspond, on renvoie true
-                Serial.println(authSuccess);
+                authSuccess();
                 return true;
             }
         }
     }
     // Sinon, on renvoie false
-    Serial.println(authFailed);
+    authFailed();
     return false;
 }
 
@@ -232,7 +260,8 @@ int authModele() {
     while (!(176 <= val && val <= 198 || 306 <= val && val <= 328 ||
              388 <= val && val <= 410 || 470 <= val && val <= 492 ||
              513 <= val && val <= 535 || 550 <= val && val <= 572 ||
-             574 <= val && val <= 596 || 636 <= val && val <= 658)) {  // Tant que la valeur n'est pas comprise entre les bornes, on relit la valeur
+             574 <= val && val <= 596 ||
+             636 <= val && val <= 658)) {  // Tant que la valeur n'est pas comprise entre les bornes, on relit la valeur
         val = analogRead(A0);
     }
     if (176 <= val && val <= 198) {  // Si la valeur est comprise entre les bornes, on renvoie le numéro du modèle
@@ -266,22 +295,48 @@ bool secu(int modele) {
     } else if (modele == 8) {  // Si le modèle est 8, on lance la fonction MA1, MA2, MA3 et MA5 et on renvoie si les 4 sont vraies ou non.
         return ((MA1() && MA2() && MA3() && MA5()) == true);
     } else {  // Si le modèle n'est pas reconnu, on renvoie false
+        authFailed();
         return false;
     }
 }
 
 void setup() {
     pinMode(A0, INPUT);  // Définition de l'entrée analogique A0 en entrée
+    pinMode(13, OUTPUT);  // Sortie LED Verte
+    pinMode(12, OUTPUT);  // Sortie LED Jaune
+    pinMode(11, OUTPUT);  // Sortie LED Orange
+    pinMode(10, OUTPUT);  // Sortie LED Rouge
+
+    pinMode(7, INPUT);  // Entrée du Bouton RESET
     Serial.begin(9600);  // Définition de la vitesse de la console série à 9600 bauds
     Serial.println("StrongBox 3000\n");  // Affichage du nom du projet
 }
 
 void loop() {
-
-    if ((secu(authModele())) == true) {
-        Serial.println("Bienvenue");
-    } else {
-        Serial.println("Acces refuse");
+    if (digitalRead(7) == HIGH) {  // Si le bouton RESET est appuyé, on réinitialise les variables
+        nomAgent = NULL;
+        open = false;
+        failed = false;
+        Serial.println("RESET\n");
+        delay(1000);
+    } else if (open == true) {
+        digitalWrite(13, HIGH);  // Allume la LED verte
+        delay(500);
+        digitalWrite(13, LOW);  // Eteint la LED verte
+        delay(500);
+    } else if (failed == true) {
+        digitalWrite(10, HIGH);  // Allume la LED rouge
+        delay(500);
+        digitalWrite(10, LOW);  // Eteint la LED rouge
+        delay(500);
+    } else {  // Si la boite n'est pas ouverte, on lance la fonction de sécurité
+        if ((secu(authModele())) == true) {
+            Serial.println("Bienvenue\n");
+            open = true;
+        } else {
+            Serial.println("Acces refuse\n");
+            failed = true;
+        }
+        delay(500);
     }
-
 }
