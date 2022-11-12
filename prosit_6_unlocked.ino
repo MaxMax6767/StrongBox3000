@@ -5,26 +5,27 @@
 //Liste des lettres d'agent (Constante)
 static char Nom[16] = {'A', 'B', 'C', 'D', 'E', 'F', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q'};
 
+//Nom de l'agent, utilisé par les fonctions MA2 et MA5
 char nomAgent;
 
-String authFailed = "Authentification non reussie"; //String authentification ratée
-String authSuccess = "Authentification reussie ! \n"; //String authentification réussie
-
-String authPrompt = "Veuillez entrer votre nom d'agent : "; //String entrer nom d'agent
-
+// Variables de phrases utilisées dans plusieurs fonctions
+String authFailed = "Authentification non reussie"; //Phrase authentification ratée
+String authSuccess = "Authentification reussie ! \n"; //Phrase authentification réussie
+String authPrompt = "Veuillez entrer votre nom d'agent : "; //Phrase de demande d'authentification
 
 //###############
 //##### MA1 #####
 //###############
 
 bool MA1() {
-    int juste = 0;
+    int juste = 0;  // Compteur de réponses justes (0 à 3)
 
-    // Def Questions & Réponses
+    // Def Questions & Réponses (Constante)
     const String Q[3][4] = {{"Si 1+1=3, 1+2=?",                                "1",                                      "4",                                                "69"},
                             {"Quel est notre methode d'assassinat preferee ?", "Tireur d'elite",                         "Paves explosifs",                                  "Missile Balistique Intercontinental"},
                             {"Quel est notre slogan?",                         "Tuer d'abord, poser les question apres", "On espionne tout le monde, c'est plus egalitaire", "On en a pas, on est un service secret"}};
-    int a[3] = {2, 3, 3};
+    // Def Réponses Justes (Constante)
+    const int a[3] = {2, 3, 3};
 
     Serial.println("Repondez aux questions afin de reussir l'authentification");
 
@@ -41,17 +42,19 @@ bool MA1() {
             // attente que la console série soit utilisée
         }
 
-        if (Serial.parseInt() == a[i]) {
+        if (Serial.parseInt() == a[i]) {  // Si la response est juste, on incrémente juste
             ++juste;
         }
-        for (int j = 0; j < 10; ++j) {
+        for (int j = 0; j < 3; ++j) {  // On sépare les questions
             Serial.println("");
         }
     }
-    if (juste == 3) {
+
+    if (juste == 3) {  // Si toutes les réponses sont justes, on renvoie true
         Serial.println(authSuccess);
         return true;
     }
+    // Sinon, on renvoie false
     Serial.println(authFailed);
     return false;
 }
@@ -87,6 +90,7 @@ int chiffrer(int M, int e) {
 }
 
 int cleAgent(char x) {
+    // Def Cle publique Agent (Constante)
     static int publicKeys[16] = {601, 619, 631, 641, 647, 653, 661, 673, 691, 701, 733, 739, 751, 797, 809, 811};
     int i = 0;
     for (i = 0; i < 16; i++) {
@@ -99,37 +103,37 @@ int cleAgent(char x) {
 }
 
 bool MA2() {
-    int Mp;
+    int essais = 3; //Nombre d'essais restants
     int M = random(2281);
-    Serial.read();
-    Serial.println(authPrompt);
+
+    Serial.println(authPrompt);  // Demande le nom de l'agent
     while (Serial.available() == 0) {
         // attente que la console série soit utilisée
     }
-    char temp = Serial.read();
-    if (nomAgent != NULL) {
-        if (nomAgent != temp) {
+    char temp = Serial.read();  // Lit le nom de l'agent
+    if (nomAgent != NULL) {  // Si le nom de l'agent est déjà connu, on vérifie qu'il est le même
+        if (nomAgent != temp) {  // Si le nom de l'agent est différent, on renvoie false
             return false;
         }
-    } else {
+    } else {  // Si le nom de l'agent n'est pas connu, on le stocke
         nomAgent = temp;
     }
-    int essais = 3; //Nombre d'essais restants
 
-    if (cleAgent(nomAgent) == -1) {
+    if (cleAgent(nomAgent) == -1) {  // Si le nom de l'agent n'est pas reconnu, on renvoie false
         return false;
     }
-    int C = chiffrer(M, cleAgent(nomAgent));
-    Serial.println("Message a dechiffrer : ");
+
+    int C = chiffrer(M, cleAgent(nomAgent));  // On chiffre M avec la clé publique de l'agent
+    Serial.print("Message a dechiffrer : ");
     Serial.println(C);
 
-    while (essais > 0) {
+    while (essais > 0) {  // Tant qu'il reste des essais, on demande la réponse
         if (Serial.available() > 0) {
-            Mp = Serial.parseInt();
-            if (M == Mp) {
+            int Mp = Serial.parseInt();
+            if (M == Mp) {  // Si la clé originale correspond à celle calculée avec la clé privée, on renvoie true
                 Serial.println(authSuccess);
                 return true;
-            } else {
+            } else {  // Sinon, on décrémente le nombre d'essais restants et on affiche un message d'erreur & le nombre d'essais restants
                 Serial.println("\nValeur incorrecte !\n");
                 essais--;
                 if (essais == 0) {
@@ -155,10 +159,11 @@ bool MA3() {
     while (Serial.available() == 0) {
         // attente que la console série soit utilisée
     }
-    if (Serial.read() == 75) {
+    if (Serial.read() == 75) {  // Si K est entré, on renvoie true
         Serial.println(authSuccess);
         return true;
     }
+    // Sinon, on renvoie false
     Serial.println(authFailed);
     return false;
 }
@@ -172,10 +177,11 @@ bool MA4() {
     while (Serial.available() == 0) {
         // attente que la console série soit utilisée
     }
-    if (Serial.read() == 75) {
+    if (Serial.read() == 75) {  // Si K est entré, on renvoie true
         Serial.println(authSuccess);
         return true;
     }
+    // Sinon, on renvoie false
     Serial.println(authFailed);
     return false;
 }
@@ -185,48 +191,51 @@ bool MA4() {
 //###############
 
 bool MA5() {
-    int cardId[16] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16};
+    // Déclaration des numéros de carte (Constante)
+    const int cardId[16] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16};
 
-    Serial.read();
-    Serial.println(authPrompt);
+    Serial.println(authPrompt);  // Demande d'identification
     while (Serial.available() == 0) {
         // attente que la console série soit utilisée
     }
-    char temp = Serial.read();
-    if (nomAgent != NULL) {
-        if (nomAgent != temp) {
+    char temp = Serial.read();  // Lit l'identification et le stocke temporairement
+    if (nomAgent != NULL) {  // Si le nom de l'agent est déjà connu, on vérifie qu'il est le même
+        if (nomAgent != temp) {  // Si le nom de l'agent est différent, on renvoie false
             Serial.println(authFailed);
             return false;
         }
-    } else {
+    } else {  // Si le nom de l'agent n'est pas connu, on le stocke
         nomAgent = temp;
     }
 
-    Serial.println("Merci de renseingner votre CardID");
+    Serial.println("Merci de renseingner votre CardID");  // Demande du numéro de carte
     while (Serial.available() == 0) {
         // attente que la console série soit utilisée
     }
-    int cId = Serial.parseInt();
+    int cId = Serial.parseInt();  // Lit le numéro de carte et le stocke temporairement
+    int i = 0;  // Initialisation de l'index
     for (int i = 0; i < 16; i++) {
-        if (Nom[i] == nomAgent) {
-            if (cardId[i] == cId) {
+        if (Nom[i] == nomAgent) {  // Si le nom de l'agent est reconnu, on vérifie que le numéro de carte correspond
+            if (cardId[i] == cId) {  // Si le numéro de carte correspond, on renvoie true
                 Serial.println(authSuccess);
                 return true;
             }
         }
     }
+    // Sinon, on renvoie false
     Serial.println(authFailed);
     return false;
 }
 
 int authModele() {
-    int val = analogRead(A0);
-    while (!(176 <= val && val <= 198 || 306 <= val && val <= 328 || 388 <= val && val <= 410 ||
-             470 <= val && val <= 492 || 513 <= val && val <= 535 || 550 <= val && val <= 572 ||
-             574 <= val && val <= 596 || 636 <= val && val <= 658)) {
+    int val = analogRead(A0);  // Lecture de la valeur de l'entrée analogique A0
+    while (!(176 <= val && val <= 198 || 306 <= val && val <= 328 ||
+             388 <= val && val <= 410 || 470 <= val && val <= 492 ||
+             513 <= val && val <= 535 || 550 <= val && val <= 572 ||
+             574 <= val && val <= 596 || 636 <= val && val <= 658)) {  // Tant que la valeur n'est pas comprise entre les bornes, on relit la valeur
         val = analogRead(A0);
     }
-    if (176 <= val && val <= 198) {
+    if (176 <= val && val <= 198) {  // Si la valeur est comprise entre les bornes, on renvoie le numéro du modèle
         return 1;
     } else if (306 <= val && val <= 328) {
         return 2;
@@ -246,25 +255,25 @@ int authModele() {
 }
 
 bool secu(int modele) {
-    if (modele == 1) {
+    if (modele == 1) {  // Si le modèle est 1, on lance la fonction MA1 et MA3 et on renvoie si les 2 sont vraies ou non.
         return ((MA1() && MA3()) == true);
-    } else if (modele == 2) {
+    } else if (modele == 2) {  // Si le modèle est 2, on lance la fonction MA1 et MA4 et on renvoie si les 2 sont vraies ou non.
         return ((MA1() && MA4()) == true);
-    } else if (modele == 3 || modele == 4) {
+    } else if (modele == 3 || modele == 4) {  // Si le modèle est 3 ou 4, on lance la fonction MA2 et MA5 et on renvoie si les 2 sont vraies ou non.
         return ((MA2() && MA5()) == true);
-    } else if (modele == 5 || modele == 6 || modele == 7) {
+    } else if (modele == 5 || modele == 6 || modele == 7) {  // Si le modèle est 5, 6 ou 7, on lance la fonction MA2, MA3 et MA5 et on renvoie si les 3 sont vraies ou non.
         return ((MA2() && MA3() && MA5()) == true);
-    } else if (modele == 8) {
+    } else if (modele == 8) {  // Si le modèle est 8, on lance la fonction MA1, MA2, MA3 et MA5 et on renvoie si les 4 sont vraies ou non.
         return ((MA1() && MA2() && MA3() && MA5()) == true);
-    } else {
+    } else {  // Si le modèle n'est pas reconnu, on renvoie false
         return false;
     }
 }
 
 void setup() {
-    pinMode(A0, INPUT);
-    Serial.begin(9600);
-    Serial.println("StrongBox 3000\n");
+    pinMode(A0, INPUT);  // Définition de l'entrée analogique A0 en entrée
+    Serial.begin(9600);  // Définition de la vitesse de la console série à 9600 bauds
+    Serial.println("StrongBox 3000\n");  // Affichage du nom du projet
 }
 
 void loop() {
