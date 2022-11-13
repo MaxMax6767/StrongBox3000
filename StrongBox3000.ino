@@ -76,7 +76,7 @@ bool MA1() {
 
     // Def Questions & Réponses (Constante)
     const String Q[3][4] = {{"Quel est le point cardinal manquant ? Nord / Est / Ouest ", "Nord", "Ouest", "Sud"},
-                            {"De quelle valeur se rapproche le nombre π ?",               "1,11", "2,25",  "3,14"},
+                            {"De quelle valeur se rapproche le nombre π ?",               "11", "25",  "3,14"},
                             {"De quelle couleur est le ciel ?",                           "Bleu", "Vert",  "Jaune"}};
     // Def Réponses Justes (Constante)
     const int a[3] = {3, 3, 1};
