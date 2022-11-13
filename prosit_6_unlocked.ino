@@ -1,3 +1,9 @@
+// Projet StrongBox 3000 Groupe 6 | 2022 | Emma HODZIC, Maxime GUG, Kellian BECHTEL, Nicolas KANIAN
+
+// Circuits TinkerCad
+//   -  Vide : https://www.tinkercad.com/things/7gGOOTXxWy2-tremendous-turing/editel?sharecode=ZT1QPOQqENZtKvYCUVdVvTiuWthbOgHH5y663p9Gpe8
+//   -  Avec Carte N°6 : https://www.tinkercad.com/things/1mIkwOzKmzu-brave-bombul/editel?sharecode=zXoShDtJSYn4roC-pafSJ6jcWq_Ewt7f5h0i94wKMuk
+
 //####################################
 //###### Def Variables Globales ######
 //####################################
@@ -5,6 +11,15 @@
 // Etat du coffre
 bool open = false;
 bool failed = false;
+
+// Initialisation du code
+int code = 0;
+
+// Initialisation de l'état des boutons
+int button1State = 0;
+int button2State = 0;
+int button3State = 0;
+int button4State = 0;
 
 //Liste des lettres d'agent (Constante)
 static char Nom[16] = {'A', 'B', 'C', 'D', 'E', 'F', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q'};
@@ -37,6 +52,23 @@ void authSuccess() {
         digitalWrite(12, LOW);
         delay(500);
     }
+}
+
+void ErrorState() {
+    // Blink 3x rouge
+    for (int counter = 0; counter < 3; ++counter) {
+        digitalWrite(7, HIGH);
+        digitalWrite(6, HIGH);
+        digitalWrite(5, HIGH);
+        digitalWrite(4, HIGH);
+        delay(500);
+        digitalWrite(7, LOW);
+        digitalWrite(6, LOW);
+        digitalWrite(5, LOW);
+        digitalWrite(4, LOW);
+        delay(500);
+    }
+    code = 0;
 }
 
 //###############
@@ -298,21 +330,87 @@ bool secu(int modele) {
 
 void setup() {
     pinMode(A0, INPUT);  // Définition de l'entrée analogique A0 en entrée
+
     pinMode(13, OUTPUT);  // Sortie LED Verte
     pinMode(12, OUTPUT);  // Sortie LED Jaune
     pinMode(11, OUTPUT);  // Sortie LED Orange
     pinMode(10, OUTPUT);  // Sortie LED Rouge
 
-    pinMode(7, INPUT);  // Entrée du Bouton RESET
+    pinMode(8, OUTPUT);  // Sortie LED Verte
+    pinMode(7, OUTPUT);  // Sortie LED Rouge
+    pinMode(6, OUTPUT);  // Sortie LED Rouge
+    pinMode(5, OUTPUT);  // Sortie LED Rouge
+    pinMode(4, OUTPUT);  // Sortie LED Rouge
+
+    pinMode(9, INPUT);  // Entrée du Bouton RESET
+
+    pinMode(A4, INPUT);  // Entrée du Bouton code N°4
+    pinMode(A3, INPUT);  // Entrée du Bouton code N°3
+    pinMode(A2, INPUT);  // Entrée du Bouton code N°2
+    pinMode(A1, INPUT);  // Entrée du Bouton code N°1
+
     Serial.begin(9600);  // Définition de la vitesse de la console série à 9600 bauds
+
     Serial.println("StrongBox 3000\n");  // Affichage du nom du projet
 }
 
 void loop() {
-    if (digitalRead(7) == HIGH) {  // Si le bouton RESET est appuyé, on réinitialise les variables
+    // Update de l'état des boutons
+    button1State = analogRead(A1);
+    button2State = analogRead(A2);
+    button3State = analogRead(A3);
+    button4State = analogRead(A4);
+
+    // Si un bouton est appuyé, on lance la fonction
+    if (button1State != 0 or button2State != 0 or button3State != 0 or button4State != 0) {
+        if (code == 3) {
+            // Si bouton 4 pressé
+            if (button1State == 0 and button2State == 0 and button3State == 0 and button4State != 0) {
+                digitalWrite(7, HIGH);  // Allumage LED Rouge 4
+                digitalWrite(8, HIGH);  // Allumage LED Verte
+                code += 1;
+                delay(100);
+            } else {
+                ErrorState();
+            }
+        } else if (code == 2) {
+            // Si bouton 3 pressé
+            if (button1State == 0 and button2State == 0 and button3State != 0 and button4State == 0) {
+                digitalWrite(6, HIGH);  // Allumage LED Rouge 3
+                code += 1;
+                delay(100);
+            } else {
+                ErrorState();
+            }
+        } else if (code == 1) {
+            // Si bouton 2 pressé
+            if (button1State == 0 and button2State != 0 and button3State == 0 and button4State == 0) {
+                digitalWrite(5, HIGH);  // Allumage LED Rouge 2
+                code += 1;
+                delay(100);
+            } else {
+                ErrorState();
+            }
+        } else if (code == 0) {
+            // Si bouton 1 pressé
+            if (button1State != 0 and button2State == 0 and button3State == 0 and button4State == 0) {  // Case 1 Valid
+                digitalWrite(4, HIGH);  // Allumage LED Rouge 1
+                code += 1;
+                delay(100);
+            } else {
+                ErrorState();
+            }
+        }
+    } else if (digitalRead(9) == HIGH) {  // Si le bouton RESET est appuyé, on réinitialise les variables
         nomAgent = NULL;
         open = false;
         failed = false;
+        code = 0;
+        digitalWrite(4, LOW);  // Extinction LED Rouge 1
+        digitalWrite(5, LOW);  // Extinction LED Rouge 2
+        digitalWrite(6, LOW);  // Extinction LED Rouge 3
+        digitalWrite(7, LOW);  // Extinction LED Rouge 4
+        digitalWrite(8, LOW);  // Extinction LED Verte
         Serial.println("RESET\n");
         delay(1000);
     } else if (open == true) {
@@ -325,7 +423,7 @@ void loop() {
         delay(500);
         digitalWrite(10, LOW);  // Eteint la LED rouge
         delay(500);
-    } else {  // Si la boite n'est pas ouverte, on lance la fonction de sécurité
+    } else if (code == 4) {  // Si la boite n'est pas ouverte, on lance la fonction de sécurité
         if ((secu(authModele())) == true) {
             Serial.println("Bienvenue\n");
             open = true;
@@ -333,6 +431,7 @@ void loop() {
             Serial.println("Acces refuse\n");
             failed = true;
         }
-        delay(500);
+        delay(100);
     }
+    delay(100);
 }
