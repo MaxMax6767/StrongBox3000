@@ -1,9 +1,5 @@
 // Projet StrongBox 3000 Groupe 6 | 2022 | Emma HODZIC, Maxime GUG, Kellian BECHTEL, Nicolas KANIAN
 
-// Circuits TinkerCad
-//   -  Vide : https://www.tinkercad.com/things/7gGOOTXxWy2-tremendous-turing/editel?sharecode=ZT1QPOQqENZtKvYCUVdVvTiuWthbOgHH5y663p9Gpe8
-//   -  Avec Carte N°6 : https://www.tinkercad.com/things/1mIkwOzKmzu-brave-bombul/editel?sharecode=zXoShDtJSYn4roC-pafSJ6jcWq_Ewt7f5h0i94wKMuk
-
 //####################################
 //###### Def Variables Globales ######
 //####################################
