@@ -158,6 +158,7 @@ int cleAgent(char x) {
 
 bool MA2() {
     int essais = 3; //Nombre d'essais restants
+    randomSeed(analogRead(A0));
     int M = random(2281);
 
     Serial.println(authPrompt);  // Demande le nom de l'agent
